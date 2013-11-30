@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>File Upload Magic</title>
+<style>
+html {
+  font-family: Arial;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#upload-box, #upload-box-border {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  min-height: 100px;
+  min-width: 200px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+#upload-box {
+  margin: 79px;
+  color: #bbb;
+}
+
+#upload-box > div {
+  display:table;
+  width: 100%;
+  height:100%;
+  -background-color: yellow;
+}
+
+#upload-box > div > div {
+  -background-color: orange;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#upload-box-border {
+  border: 9px solid #ccc;
+  border-radius: 7px;
+  margin: 70px;
+}
+
+#fps-monitor {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 5px;
+  font-size: 17px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="fps-monitor">0.0</div>
+
+<script language="javascript">
+function testAnim() {
+  var bo = document.getElementById("upload-box");
+  var currentMargin = parseFloat(window.getComputedStyle(bo).margin);
+
+  alert('margin = ' + currentMargin);
+  var newM = currentMargin.toString() + 'px';
+  alert('margin px = ' + newM);
+}
+
+var fpsMonitor = document.getElementById('fps-monitor');
+
+var runningAnimation = null;
+
+function sexyCurve(n) {
+  return n;
+}
+
+function animate(fun, duration, from, to, current) {
+  if (runningAnimation) {
+    window.clearInterval(runningAnimation);
+  }
+  var actualDuration = (window.event && window.event.shiftKey) ? duration * 10 : duration;
+  var progress = (current - from) / (to - from);
+  var startTime = Date.now() - (progress * actualDuration);
+  var endTime = startTime + actualDuration;
+  var frameCount = 0;
+  runningAnimation = window.setInterval(function() {
+      var elapsed = Date.now() - startTime;
+
+      progress = elapsed / actualDuration;
+      var position;
+      if (progress >= 1) {
+        window.clearInterval(runningAnimation);
+        runningAnimation = null;
+        progress = 1;
+        position = to;
+      } else {
+        progress = sexyCurve(progress);
+        position = from + (to - from) * progress;
+
+        frameCount += 1;
+        if (frameCount > 1) {
+          var fps = 1000 / (elapsed / frameCount);
+          fpsMonitor.innerText = frameCount.toString() + " @ " + fps.toFixed(1);
+        }
+      }
+      fun(position, progress);
+    }, 5);
+}
+
+var boxDuration = 70;
+var fontGrowthPx = 14;
+
+function enterBox() {
+  var bt = document.getElementById("upload-box");
+  var bo = document.getElementById("upload-box-border");
+  var bs = document.getElementById("upload-box-select");
+  var currentMargin = parseFloat(window.getComputedStyle(bo).margin);
+  animate(function (m, r) {
+        bo.style.margin = m.toString() + 'px';
+        bt.style.fontSize = (32 + r * fontGrowthPx).toString() + 'px';
+        bs.style.opacity = 1 - r;
+        //bs.style.width = (93 * (1 - r)).toString() + 'px';
+        //bs.style.margin = (46.5 * r).toString() + 'px';
+      }, boxDuration,
+      70, 56, currentMargin);
+}
+
+function exitBox() {
+  var bt = document.getElementById("upload-box");
+  var bo = document.getElementById("upload-box-border");
+  var bs = document.getElementById("upload-box-select");
+  var currentMargin = parseFloat(window.getComputedStyle(bo).margin);
+  animate(function (m, r) {
+        bo.style.margin = m.toString() + 'px';
+        bt.style.fontSize = (32 + (1 - r) * fontGrowthPx).toString() + 'px';
+        bs.style.opacity = r;
+        //bs.style.width = (93 * r).toString() + 'px';
+        //bs.style.margin = (46.5 * (1 - r)).toString() + 'px';
+      }, boxDuration,
+      56, 70, currentMargin);
+}
+</script>
+
+<p onclick="testAnim();">Upload a file</p>
+
+<div id="upload-box">
+  <div>
+    <div>
+      <img id="upload-box-select" src="uploadbutton.png" /><br />
+      Drop File</div>
+  </div>
+</div>
+
+<div id="upload-box-border"
+    ondragenter="enterBox();" ondragleave="exitBox();">
+</div>
+
+<p style="text-align: right;">(c) Turtle Panda</p>
+
+</body>
+
+</html>
